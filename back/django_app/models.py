@@ -79,7 +79,7 @@ class Profile(models.Model):
 
 @receiver(post_save, sender=User)
 def profile_create(sender, instance: User, created: bool, **kwargs):
-    profile = Profile.objects.get_or_create(user=instance)
+    Profile.objects.get_or_create(user=instance)
 
 
 class Friends(models.Model):
@@ -124,7 +124,7 @@ class Friends(models.Model):
         return f"<Friends [{self.id}] from {self.from_user} to {self.to_user}/>"
 
 class Workout(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         verbose_name="Пользователь",
         db_index=True,
         primary_key=False,
@@ -178,7 +178,8 @@ class PlannedExercise(models.Model):
         primary_key=False,
         editable=True,
         blank=True,
-        null=False,
+        null=True,
+        default=None,
         to=Workout,
         on_delete=models.CASCADE,
         related_name="planned_workout",
@@ -203,7 +204,7 @@ class PlannedExercise(models.Model):
         return f"<PlannedExercise [{self.id}] workout {self.workout}/>"
 
 class PlannedApproach(models.Model):
-    execise = models.ForeignKey(
+    exercise = models.ForeignKey(
         verbose_name="Тренировка",
         db_index=True,
         primary_key=False,
@@ -212,7 +213,7 @@ class PlannedApproach(models.Model):
         null=True,
         to=PlannedExercise,
         on_delete=models.CASCADE,
-        related_name="planned_execise",
+        related_name="planned_exercise",
     )
     planned_time = models.PositiveIntegerField(
         verbose_name="Планированное время выполнения упражнения(секунды)",
@@ -257,7 +258,7 @@ class PlannedApproach(models.Model):
         verbose_name_plural = "Планированные подходы"
 
     def __str__(self):
-        return f"<PlannedApproach [{self.id}] exercise {self.execise}/>"
+        return f"<PlannedApproach [{self.id}] exercise {self.exercise}/>"
     
 class FactualExercise(models.Model):
     workout = models.ForeignKey(
@@ -288,10 +289,10 @@ class FactualExercise(models.Model):
         verbose_name_plural = "Фактические упражнения"
 
     def __str__(self):
-        return f"<FactualExecise [{self.id}] workout {self.workout}/>"
+        return f"<FactualExercise [{self.id}] workout {self.name}/>"
 
 class FactualApproach(models.Model):
-    execise = models.ForeignKey(
+    exercise = models.ForeignKey(
         verbose_name="Тренировка",
         db_index=True,
         primary_key=False,
@@ -300,10 +301,10 @@ class FactualApproach(models.Model):
         null=False,
         to=FactualExercise,
         on_delete=models.CASCADE,
-        related_name="factual_execise",
+        related_name="factual_exercise",
     )
     factual_time = models.PositiveIntegerField(
-        verbose_name="Планированное время выполнения упражнения(секунды)",
+        verbose_name="Фактическое время выполнения упражнения(секунды)",
         db_index=True,
         primary_key=False,
         editable=True,
@@ -345,7 +346,7 @@ class FactualApproach(models.Model):
         verbose_name_plural = "Фактические подходы"
 
     def __str__(self):
-        return f"<FactualApproach [{self.id}] execise {self.execise}/>"
+        return f"<FactualApproach [{self.id}] exercise {self.exercise}/>"
     
 class Exercises(models.Model):
     name = models.CharField(
@@ -373,3 +374,10 @@ class Exercises(models.Model):
 
     def __str__(self):
         return f"<Exercises [{self.id}] {self.name}/>"
+    
+
+
+
+
+
+
