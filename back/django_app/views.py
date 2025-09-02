@@ -209,7 +209,7 @@ def api_user_workout_info(request: Request, workout_id: int, user_id: int) -> Re
 @api_view(http_method_names=["POST"])
 @permission_classes([AllowAny])
 def api_create_workout_plan(request: Request) -> Response:
-    serializer = input_serializers.WorkoutSerializer(data=request.data["data"])
+    serializer = input_serializers.WorkoutSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(
@@ -225,7 +225,7 @@ def api_create_workout_plan(request: Request) -> Response:
 @api_view(http_method_names=["POST"])
 @permission_classes([AllowAny])
 def api_input_workout_data(request: Request) -> Response:
-    serializer = input_serializers.WorkoutSerializer(data=request.data["data"])
+    serializer = input_serializers.FactualExerciseSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(

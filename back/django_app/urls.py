@@ -25,6 +25,7 @@ urlpatterns = [
     path("api/all/workouts/user/<int:user_id>",views.api_all_user_workout),
     path("api/workout/info/<int:workout_id>/user/<int:user_id>",views.api_user_workout_info),
     path("api/create/workout",views.api_create_workout_plan),
+    path("api/input/workout/data",views.api_input_workout_data),
 
     path("api/weight/index/<int:user_id>",views.api_weight_index),
 

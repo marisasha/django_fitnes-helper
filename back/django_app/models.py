@@ -213,7 +213,7 @@ class PlannedApproach(models.Model):
         null=True,
         to=PlannedExercise,
         on_delete=models.CASCADE,
-        related_name="planned_exercise",
+        related_name="planned_approach",
     )
     planned_time = models.PositiveIntegerField(
         verbose_name="Планированное время выполнения упражнения(секунды)",

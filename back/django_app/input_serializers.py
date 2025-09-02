@@ -20,7 +20,7 @@ class FriendsStatusChangerSerializer(serializers.Serializer):
 
 class PlannedApproachSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.FactualApproach
+        model = models.PlannedApproach
         fields = [
             "planned_time",
             "speed_exercise_equipment",
@@ -31,18 +31,16 @@ class PlannedApproachSerializer(serializers.ModelSerializer):
 
 class PlannedExerciseSerializer(serializers.ModelSerializer):
     approaches = PlannedApproachSerializer(many=True)
+
     class Meta:
-        model = models.FactualExercise
-        fields = [ "name", "approaches"]
+        model = models.PlannedExercise
+        fields = ["name", "approaches"]
 
     def create(self, validated_data):
         approaches_data = validated_data.pop("approaches", [])
-        exercise = models.FactualExercise.objects.create(**validated_data)
-        models.FactualApproach.objects.bulk_create(
-            [
-                models.FactualApproach(exercise=exercise, **approach)
-                for approach in approaches_data
-            ]
+        exercise = models.PlannedExercise.objects.create(**validated_data)
+        models.PlannedApproach.objects.bulk_create(
+            [models.PlannedApproach(exercise=exercise, **approach) for approach in approaches_data]
         )
         return exercise
 
@@ -52,25 +50,24 @@ class WorkoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Workout
-        fields = [ "name", "exercises"]
+        fields = ["name", "user" , "exercises"]
 
     def create(self, validated_data):
         exercises_data = validated_data.pop("exercises", [])
+        print(validated_data["user"],"\n\n\n\n\n\n")
         workout = models.Workout.objects.create(**validated_data)
 
         for exercise_data in exercises_data:
             approaches_data = exercise_data.pop("approaches", [])
-            exercise = models.FactualExercise.objects.create(
+            exercise = models.PlannedExercise.objects.create(
                 workout=workout, **exercise_data
             )
-            models.FactualApproach.objects.bulk_create(
-                [
-                    models.FactualApproach(exercise=exercise, **approach)
-                    for approach in approaches_data
-                ]
+            models.PlannedApproach.objects.bulk_create(
+                [models.PlannedApproach(exercise=exercise, **approach) for approach in approaches_data]
             )
 
         return workout
+
     
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= #
 
@@ -89,7 +86,7 @@ class FactualExerciseSerializer(serializers.ModelSerializer):
     approaches = FactualApproachSerializer(many=True)
     class Meta:
         model = models.FactualExercise
-        fields = [ "name", "approaches"]
+        fields = [ "name", "workout","approaches"]
 
     def create(self, validated_data):
         approaches_data = validated_data.pop("approaches", [])
