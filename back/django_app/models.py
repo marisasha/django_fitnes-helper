@@ -160,7 +160,17 @@ class Workout(models.Model):
         blank=True,
         null=True,
         default=None,
-        max_length=50,
+        max_length=18,
+    )
+    type = models.CharField(
+        verbose_name="Тип тренировки",
+        db_index=True,
+        primary_key=False,
+        editable=True,
+        blank=True,
+        null=True,
+        default=None,
+        max_length=20,
     )
     class Meta:
         app_label = "django_app"

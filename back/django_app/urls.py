@@ -23,7 +23,9 @@ urlpatterns = [
     path("api/delete/friends",views.api_delete_friend),
 
     path("api/all/workouts/user/<int:user_id>",views.api_all_user_workout),
+    path("api/all/workouts/planned/user/<int:user_id>",views.api_all_planned_user_workout),
     path("api/workout/info/<int:workout_id>/user/<int:user_id>",views.api_user_workout_info),
+    path("api/workout/planned/info/<int:workout_id>/user/<int:user_id>",views.api_user_planned_workout_info),
     path("api/create/workout",views.api_create_workout_plan),
     path("api/input/workout/data",views.api_input_workout_data),
 

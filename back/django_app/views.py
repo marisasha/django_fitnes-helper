@@ -8,8 +8,10 @@ from django_app import models, output_serializers, input_serializers
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from drf_spectacular.utils import extend_schema
+
 # from django.forms import ValidationError
 from django.db.models import QuerySet
+
 # from django.shortcuts import render
 # from django.http import HttpRequest
 # from django.utils import timezone
@@ -81,15 +83,16 @@ def get_all_profiles(request: Request) -> Response:
 def api_weight_index(request: Request, user_id: int) -> Response:
     try:
         user = User.objects.get(id=int(user_id))
-        profile = models.Profile.objects.get(user = user)
+        profile = models.Profile.objects.get(user=user)
         weight_index = profile.weight / (profile.height * 0.01) ** 2
         return Response(data={"weight_index": weight_index}, status=status.HTTP_200_OK)
     except Exception:
         return Response(
-            data={"message": "Profile or Profile's data didn't found",},
+            data={
+                "message": "Profile or Profile's data didn't found",
+            },
             status=status.HTTP_404_NOT_FOUND,
         )
-
 
 
 @extend_schema(
@@ -155,7 +158,7 @@ def api_accept_request_to_friends(request: Request) -> Response:
 
 @extend_schema(
     request=input_serializers.FriendsStatusChangerSerializer,
-    summary="Добавление пользователя в друзья",
+    summary="Удаление пользователя из друзей",
 )
 @api_view(http_method_names=["DELETE"])
 @permission_classes([AllowAny])
@@ -192,11 +195,35 @@ def api_all_user_workout(request: Request, user_id: int) -> Response:
 
 
 @api_view(http_method_names=["GET"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
+def api_all_planned_user_workout(request: Request, user_id: int) -> Response:
+    user = User.objects.get(id=user_id)
+    workouts_data = models.Workout.objects.filter(user=user)
+    workouts_data_serializer = output_serializers.PlannedWorkoutListSerializer(
+        workouts_data, many=True if isinstance(workouts_data, QuerySet) else False
+    ).data
+    return Response(data={"data": workouts_data_serializer}, status=status.HTTP_200_OK)
+
+
+@api_view(http_method_names=["GET"])
+@permission_classes([IsAuthenticated])
 def api_user_workout_info(request: Request, workout_id: int, user_id: int) -> Response:
     user = User.objects.get(id=int(user_id))
     workout_data = models.Workout.objects.get(user=user, id=int(workout_id))
     workout_data_serializer = output_serializers.WorkoutInfoHardSerializer(
+        workout_data, many=True if isinstance(workout_data, QuerySet) else False
+    ).data
+    return Response(data={"data": workout_data_serializer}, status=status.HTTP_200_OK)
+
+
+@api_view(http_method_names=["GET"])
+@permission_classes([IsAuthenticated])
+def api_user_planned_workout_info(
+    request: Request, workout_id: int, user_id: int
+) -> Response:
+    user = User.objects.get(id=int(user_id))
+    workout_data = models.Workout.objects.get(user=user, id=int(workout_id))
+    workout_data_serializer = output_serializers.PlannedWorkoutInfoHardSerializer(
         workout_data, many=True if isinstance(workout_data, QuerySet) else False
     ).data
     return Response(data={"data": workout_data_serializer}, status=status.HTTP_200_OK)
@@ -207,7 +234,7 @@ def api_user_workout_info(request: Request, workout_id: int, user_id: int) -> Re
     summary="Создание плана тренировки",
 )
 @api_view(http_method_names=["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def api_create_workout_plan(request: Request) -> Response:
     serializer = input_serializers.WorkoutSerializer(data=request.data)
     if serializer.is_valid():
@@ -219,18 +246,16 @@ def api_create_workout_plan(request: Request) -> Response:
 
 
 @extend_schema(
-    request=input_serializers.FactualExerciseSerializer,
+    request=input_serializers.FactualWorkoutInputSerializer,
     summary="Заполнение данных о проведенной тренировке",
 )
 @api_view(http_method_names=["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def api_input_workout_data(request: Request) -> Response:
-    serializer = input_serializers.FactualExerciseSerializer(data=request.data)
+    serializer = input_serializers.FactualWorkoutInputSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(
             {"message": "Workout successfully input"}, status=status.HTTP_201_CREATED
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
